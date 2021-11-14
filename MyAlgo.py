@@ -45,7 +45,6 @@ class MyAlgo:
                     if temp_time < best_time:
                         best_time = temp_time
                         best_elev = elev
-
                 else:
                     pos = calc_elevator_pos(elev, call)
                     if elev.dir == call.state:

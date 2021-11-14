@@ -16,14 +16,13 @@ class Elevator:
         self.stopTime = float(elevator_data['_stopTime'])
 
         self.WAIT_TIME = self.stopTime + self.startTime + self.closeTime + self.openTime
-        self.queue = []
+        self.floor = []
         self.dir = 0
-        self.pos = 0
-        self.queue_time = 0
+        self.pos = int(0)
+        self.elev_time = 0
         self.nextFloor = 0
-
 
     # Calculate the distance include stops
     def calcAllQueue(self) -> float:
-        dif = abs (self.queue[-1] - self.queue[0])
-        return dif / self.speed + len(self.queue) *(self.startTime + self.stopTime + self.closeTime + self.openTime)
+        dif = abs(self.floor[0] - self.floor[-1])
+        return dif / self.speed + len(self.floor) * (self.startTime + self.stopTime + self.closeTime + self.openTime)

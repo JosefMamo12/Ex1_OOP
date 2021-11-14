@@ -2,20 +2,15 @@ from csv import reader, writer
 
 
 class Calls:
-    def __init__(self, time, src, dest):
+    def __init__(self, name, time, src, dest, allocated_elev):
+        self.name = name
         self.time = float(time)
         self.src = int(src)
         self.dest = int(dest)
+        self.allocated_elev = allocated_elev
         if src > dest:
-            self.call_state = -1
+            self.state = -1
         else:
             self.call_state = 1
 
-    def getCalls(self, calls_file):
-        my_calls = []
-        index = 0
-        with open(calls_file, 'r') as call_file:
-            all_calls = reader(call_file)
-        for call in all_calls:
-            my_calls[index] = Calls(call[1], call[2], call[3])
-            index = index + 1
+

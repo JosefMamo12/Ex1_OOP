@@ -5,28 +5,40 @@ from Building import Building
 from Calls import Calls
 from Elevator import Elevator
 
+UP = 1
+DOWN = -1
 
-def calc_elevator_pos(elev, call):
-    if len(elev.floor) == 0:
-        return 0
-    elevator_time = elev.elev_time
+
+def calc_elevator_pos(elev: Elevator, call: Calls):
+    if not elev.floor:
+        return elev.pos
+    time_different = call.time - elev.startingTime
     call_time = call.time
-    time_different = call_time - elevator_time
-    current_floor = elev.floor[0]
+    elevator_time = call_time - time_different
+    if elevator_time > elev.timeToEnd:
+        current_floor = elev.floor[-1]
+        return current_floor
+    current_floor = elev.pos
     for nextFloor in elev.floor:
-        if nextFloor != elev.pos:
-            tmp_time = calc_distance(elev, current_floor, nextFloor)
-            if tmp_time < time_different:
-                time_different = tmp_time + elev.WAIT_TIME - time_different
-                current_floor = nextFloor
-            else:
-                break
+        tmp_time = calc_distance(elev, current_floor, nextFloor) * elev.STOP_TIME
+        if tmp_time < time_different:
+            time_different = time_different - tmp_time
+            current_floor = nextFloor
+        else:
+            break
+    if time_different < elev.STOP_TIME:
+        return math.floor(current_floor)
     final_floor = current_floor + time_different / elev.speed
-    return final_floor
+    return math.floor(final_floor)
 
 
-def calc_distance(elev, src, dest):
+def calc_distance(elev: Elevator, src, dest):
     return abs(src - dest) / elev.speed
+
+
+def calc_time_to_end(elev: Elevator, c: Calls, pos: int) -> float:
+    dist = calc_distance(elev, pos, c.src) + len(elev.floor) * elev.STOP_TIME + calc_distance(elev, c.src, c.dest)
+    return dist
 
 
 class MyAlgo:
@@ -35,37 +47,65 @@ class MyAlgo:
         self.calls = calls
 
     def start_to_allocate(self):
-        for call in self.calls:
+        for c in self.calls:
             best_elev = self.building.elevs[0]
-            best_time = sys.maxsize
+            bestElevDist = sys.maxsize
             for elev in self.building.elevs:
-                index = 0
-                if not elev.floor:
-                    temp_time = calc_distance(elev, elev.pos, call.src)
-                    if temp_time < best_time:
-                        best_time = temp_time
+                pos = elev.pos = calc_elevator_pos(elev, c)
+                if not elev.floor and not elev.pqUp and not elev.pqDown:  # Means the elevator is not busy
+                    elevDistance = calc_distance(elev, elev.pos, c.src)
+                    if elevDistance < bestElevDist:
+                        bestElevDist = elevDistance
                         best_elev = elev
-                else:
-                    pos = calc_elevator_pos(elev, call)
-                    if elev.dir == call.state:
-                        if elev.dir == 1:
-                            if pos <= call.src:
-                                best_elev = elev
-                                break
-                        elif elev.dir == -1:
-                            if pos >= call.src:
-                                best_elev = elev
-                                index += 1
-                                break
-                    else:
-                        last_floor = elev.queue[-1]
-                        temp_time = elev.calcAllQueue() + calc_distance(elev, last_floor, call.src)
-                        if temp_time < best_time:
-                            best_elev = elev
-                            best_time = temp_time
+                        best_elev.flag = True
 
-            best_elev.dir = call.state
-            best_elev.floor.append(call.src)
-            best_elev.floor.append(call.dest)
-            best_elev.pos = math.floor(calc_elevator_pos(best_elev, call))
-            best_elev.floor_time = best_time
+                else:  # This specific elevator is busy
+                    if elev.startingTime <= c.time <= elev.timeToEnd:
+                        if elev.dir == UP and elev.pos <= c.src:
+                            best_elev = elev
+                            break
+
+                        elif elev.dir == DOWN and elev.pos >= c.src:
+                            best_elev = elev
+                            break
+                        elif elev.dir == UP and elev.pos > c.src:
+                            if elev.pqDown:
+                                elevDistance = elev.calcAllQueue() + calc_distance(elev, elev.floor[0],
+                                                                                   elev.floor[-1]) + calc_distance(
+                                    elev, elev.pqDown[0], elev.pqDown[-1]) + len(
+                                    elev.pqDown) * elev.WAIT_TIME + calc_distance(elev, elev.pqDown[-1], c.src)
+                            else:
+                                elevDistance = elev.calcAllQueue() + calc_distance(elev, elev.floor[0],
+                                                                                   elev.floor[-1]) + calc_distance(
+                                    elev.floor[-1], c.src)
+                        else:
+                            if elev.pqUp:
+                                elevDistance = elev.calcAllQueue() + calc_distance(elev, elev.pos,
+                                                                                   elev.floor[-1]) + calc_distance(
+                                    elev, elev.pqUp[0], elev.pqUp[-1]) + len(
+                                    elev.pqUp) * elev.WAIT_TIME + calc_distance(elev, elev.pqDown[-1], c.src)
+                            else:
+                                elevDistance = elev.calcAllQueue() + calc_distance(elev, elev.pos,
+                                                                                   elev.floor[-1]) + calc_distance(elev, elev.floor[-1], c.src)
+                        if bestElevDist > elevDistance:
+                            bestElevDist = elevDistance
+                            best_elev = elev
+
+                    else:
+                        elev.floor.clear()
+                        elev.flag = False
+                        elevDistance = calc_distance(elev, elev.pos, c.src)
+                        if elevDistance < bestElevDist:
+                            bestElevDist = elevDistance
+                            best_elev = elev
+
+            if best_elev.flag:
+                best_elev.startingTime = c.time
+                best_elev.flag = False
+            best_elev.dir = c.state
+            if best_elev.pos != c.src and c.src not in best_elev.floor:
+                best_elev.floor.append(c.src)
+            if c.dest not in best_elev.floor:
+                best_elev.floor.append(c.dest)
+            best_elev.timeToEnd = best_elev.startingTime + calc_time_to_end(best_elev, c, best_elev.pos)
+            c.allocated_elev = best_elev.id - 1

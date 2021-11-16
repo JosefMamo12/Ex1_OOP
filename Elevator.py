@@ -1,4 +1,5 @@
-from Calls import Calls
+
+from queue import PriorityQueue
 
 
 class Elevator:
@@ -15,14 +16,18 @@ class Elevator:
         self.startTime = float(elevator_data['_startTime'])
         self.stopTime = float(elevator_data['_stopTime'])
 
-        self.WAIT_TIME = self.stopTime + self.startTime + self.closeTime + self.openTime
+        self.STOP_TIME = self.stopTime + self.startTime + self.closeTime + self.openTime
         self.floor = []
         self.dir = 0
         self.pos = int(0)
-        self.elev_time = 0
-        self.nextFloor = 0
+        self.startingTime = 0
+        self.timeToEnd = 0
+        self.timeNow = 0
+        self.pqUp = []
+        self.pqDown = []
+        self.flag = False
 
     # Calculate the distance include stops
     def calcAllQueue(self) -> float:
-        dif = abs(self.floor[0] - self.floor[-1])
-        return dif / self.speed + len(self.floor) * (self.startTime + self.stopTime + self.closeTime + self.openTime)
+        dif = abs(self.pos - self.floor[-1])
+        return dif + len(self.floor) * self.STOP_TIME / self.speed

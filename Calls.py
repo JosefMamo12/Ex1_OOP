@@ -7,10 +7,16 @@ class Calls:
         self.time = float(time)
         self.src = int(src)
         self.dest = int(dest)
-        self.allocated_elev = allocated_elev
-        if src > dest:
+        self.allocated_elev = int(allocated_elev)
+        if self.src > self.dest:
             self.state = -1
         else:
-            self.call_state = 1
+            self.state = 1
 
+    def __repr__(self) -> str:
+        str = "{},  {}, {}, {} , {}, {}".format(self.name, self.time,
+                                                self.src, self.dest,
+                                                self.state,
+                                                self.allocated_elev)
 
+        return str

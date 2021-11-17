@@ -12,7 +12,7 @@ all_calls = []
 output = []
 
 
-def handle_files(building_file='Ex1_Buildings/B3.json', csv_file='Ex1_Calls/Calls_a.csv'):
+def handle_files(building_file, csv_file):
     try:
         with open(csv_file, 'r+') as csv_call_file:
             line = csv.reader(csv_call_file)
@@ -53,7 +53,7 @@ def allocate_calls():
         output.append(['Elevator Call', c.time, c.src, c.dest, 0, index])
 
 
-def create_output_file(output_file='MyCalls.csv'):
+def create_output_file(output_file):
     with open(output_file, 'w', newline='') as calls:
         writer = csv.writer(calls)
         for i in range(len(output)):
@@ -61,6 +61,9 @@ def create_output_file(output_file='MyCalls.csv'):
 
 
 if __name__ == '__main__':
-    handle_files()
+    building_file = sys.argv[1]
+    call_file = sys.argv[2]
+    out_file = sys.argv[3]
+    handle_files(building_file, call_file)
     allocate_calls()
-    create_output_file()
+    create_output_file(out_file)

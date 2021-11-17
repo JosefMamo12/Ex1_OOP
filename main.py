@@ -8,52 +8,59 @@ from Calls import Calls
 import sys
 
 elevator_list = []
+all_calls = []
+output = []
+
+
+def handle_files(building_file='Ex1_Buildings/B3.json', csv_file='Ex1_Calls/Calls_a.csv'):
+    try:
+        with open(csv_file, 'r+') as csv_call_file:
+            line = csv.reader(csv_call_file)
+            for row in line:
+                call = Calls(row[0], row[1], row[2], row[3], row[4], row[5])
+                all_calls.append(call)
+    except IOError as e:
+        print(e)
+    # Opening JSON file
+    try:
+        with open(building_file, 'r+') as f:
+            building_data = json.load(f)
+        for value in building_data["_elevators"]:
+            print(value)
+            elevator_list.append(
+                Elevator(value))
+    except IOError as e:
+        print(e)
 
 
 def minimum_time(call):
     mini = float('inf')
-    index = 0
+    min_index = 0
     for i in range(len(elevator_list)):
-        if (mini > elevator_list[i].timeToArrive(call)):
-            mini = elevator_list[i].timeToArrive((call))
-            index = i
-    return index
+        tta = elevator_list[i].time_to_arrive(call)
+        if mini > tta:
+            mini = tta
+            min_index = i
+    elevator_list[min_index].time += mini
+    return min_index
 
 
-# Opening JSON file
-building_file = open('Ex1_Buildings/B2.json')
-# Opening CSV files
-call_file = open('Ex1_Calls/Calls_a.csv', 'r')
-all_calls = reader(call_file)
-# returns JSON object as
-# a dictionary
-building_data = json.load(building_file)
+# allocate calls by using a greedy algorithm:
+def allocate_calls():
+    for c in all_calls:  # for each call
+        index = minimum_time(c)  # get the elevator with the mininaml total time
+        elevator_list[index].queue.append(c)  # put the call in the elevator
+        output.append(['Elevator Call', c.time, c.src, c.dest, 0, index])
 
-# Creating the elevator class from the Building Json file
-for value in building_data["_elevators"]:
-    print(value)
-    elevator_list.append(
-        Elevator(value["_id"], value["_speed"], value["_minFloor"], value["_maxFloor"], value["_closeTime"],
-                 value["_openTime"], value["_startTime"], value["_stopTime"]))
-print(elevator_list)
 
-# Iterate over calls file and compute to which call
-# The best elevator will fit.
+def create_output_file(output_file='MyCalls.csv'):
+    with open(output_file, 'w', newline='') as calls:
+        writer = csv.writer(calls)
+        for i in range(len(output)):
+            writer.writerow(output[i])
 
-data = []
-for line in all_calls:
-    c = Calls(line[1], line[2], line[3])
-    index = minimum_time(c)
-    elevator_list[index].queue.append(c)
-    list = ['Elevator Call', c.time, c.src, c.dest, 0, index]
-    data.append(list)
 
-with open('MyCalls.csv', 'w', newline='') as calls:
-    writer = csv.writer(calls)
-    for i in range(len(data)):
-        writer.writerow(data[i])
-
-# if elevator is empty when allocating move to source
-# Closing file
-building_file.close()
-call_file.close()
+if __name__ == '__main__':
+    handle_files()
+    allocate_calls()
+    create_output_file()

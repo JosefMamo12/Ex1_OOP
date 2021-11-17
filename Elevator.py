@@ -1,27 +1,32 @@
 from Calls import Calls
+import time
 
 
 class Elevator:
     def __repr__(self) -> str:
         return "ID: " + str(self.id) + ", Speed: " + str(self.speed)
 
-    def __init__(self, id, speed, minFloor, maxFloor, closeTime, openTime, startTime, stopTime):
-        self.id = int(id)
-        self.speed = float(speed)
-        self.minFloor = int(minFloor)
-        self.maxFloor = int(maxFloor)
-        self.closeTime = float(closeTime)
-        self.openTime = float(openTime)
-        self.startTime = float(startTime)
-        self.stopTime = float(stopTime)
+    def __init__(self, value):
+        self.id = int(value['_id'])
+        self.speed = float(value['_speed'])
+        self.minFloor = int(value['_minFloor'])
+        self.maxFloor = int(value['_maxFloor'])
+        self.closeTime = float(value['_closeTime'])
+        self.openTime = float(value['_openTime'])
+        self.startTime = float(value['_startTime'])
+        self.stopTime = float(value['_stopTime'])
+        self.avg_floor = (self.minFloor + self.maxFloor) / 2
         self.queue = []
-        self.pos = 0
-        self.state = 0
+        self.time = float(0)
 
-    def timeToArrive(self, call):
+    def time_to_arrive(self, c: Calls):
         time = 0
         time += (self.openTime + self.closeTime) * 2
-        if self.pos != call.src:
-            time += self.startTime + self.stopTime + abs(self.pos - call.src) / self.speed
-        time += self.startTime + self.stopTime + abs(call.src - call.dest) / self.speed
+        # if the call dest isnt the current floor add the travel time
+        if self.avg_floor != c.src:
+            time += self.startTime + self.stopTime + abs(self.avg_floor - c.src) / self.speed
+        # add the travel time to dest
+        time += self.startTime + self.stopTime + abs(c.src - c.dest) / self.speed
+        if not self.time < c.time:  # if the call doesn't happens after the current elevator queue will finish
+            time += c.time  # add to time the difference
         return time

@@ -77,4 +77,5 @@ https://www.youtube.com/watch?v=oY1QlCqWOss
 How to activate this program:
 path to Ex1 directory \python main.py Ex1_Buildings\"Buidling Json file" Ex1_Calls\"Calls csv file" "Out csv file"
 for example:
+
 ![](../../AppData/Local/Temp/b2156390-d5ff-4197-b189-b811b8364c6c.jpg)

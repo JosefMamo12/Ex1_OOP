@@ -73,3 +73,6 @@ https://github.com/lettergram/ElevatorAllocation
 https://www.youtube.com/watch?v=BCN9mQOT3RQ
 
 https://www.youtube.com/watch?v=oY1QlCqWOss
+
+How to activate this program:
+path to Ex1 directory \python main.py Ex1_Buildings\"Buidling Json file" Ex1_Calls\"Calls csv file" "Out csv file"

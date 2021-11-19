@@ -6,6 +6,8 @@ from Calls import Calls
 
 import sys
 
+from Elevator import Elevator
+
 elevator_list = []
 all_calls = []
 output = []

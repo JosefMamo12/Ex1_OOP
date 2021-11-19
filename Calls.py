@@ -1,5 +1,7 @@
+
 class Calls:
     def __init__(self, name, time, src, dest, state, allocated_elev):
+
         self.name = name
         self.time = float(time)
         self.src = int(src)
@@ -15,3 +17,4 @@ def __repr__(self) -> str:
                                             self.allocated_elev)
 
     return str
+

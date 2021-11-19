@@ -1,5 +1,4 @@
 from Calls import Calls
-import time
 
 
 class Elevator:
@@ -30,3 +29,4 @@ class Elevator:
         if not self.time < c.time:  # if the call doesn't happens after the current elevator queue will finish
             time += c.time  # add to time the difference
         return time
+

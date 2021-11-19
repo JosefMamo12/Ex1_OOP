@@ -1,10 +1,9 @@
 import csv
 import json
-import sys
-from csv import reader, writer
+from _csv import reader
 
-from Elevator import Elevator
 from Calls import Calls
+
 import sys
 
 elevator_list = []
@@ -67,3 +66,4 @@ if __name__ == '__main__':
     handle_files(building_file, call_file)
     allocate_calls()
     create_output_file(out_file)
+

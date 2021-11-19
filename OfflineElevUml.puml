@@ -1,0 +1,36 @@
+@startuml
+'https://plantuml.com/class-diagram
+
+
+
+
+
+
+
+calls_file --|> main
+Building_file --|> main
+main --|> output_file
+Elevator --|> main
+Calls --|>  main
+
+file output_file{
+}
+file calls_file{
+}
+file Building_file{
+}
+class main{
+allocate_elev()
+minmum_time()
+}
+
+class Elevator {
+init()
+timeToArrive()
+}
+
+class Calls {
+init()
+}
+
+@enduml

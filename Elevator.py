@@ -1,33 +1,32 @@
-
-from queue import PriorityQueue
+from Calls import Calls
 
 
 class Elevator:
     def __repr__(self) -> str:
         return "ID: " + str(self.id) + ", Speed: " + str(self.speed)
 
-    def __init__(self, elevator_data):
-        self.id = int(elevator_data['_id'])
-        self.speed = float(elevator_data['_speed'])
-        self.minFloor = int(elevator_data['_minFloor'])
-        self.maxFloor = int(elevator_data['_maxFloor'])
-        self.closeTime = float(elevator_data['_closeTime'])
-        self.openTime = float(elevator_data['_openTime'])
-        self.startTime = float(elevator_data['_startTime'])
-        self.stopTime = float(elevator_data['_stopTime'])
+    def __init__(self, value):
+        self.id = int(value['_id'])
+        self.speed = float(value['_speed'])
+        self.minFloor = int(value['_minFloor'])
+        self.maxFloor = int(value['_maxFloor'])
+        self.closeTime = float(value['_closeTime'])
+        self.openTime = float(value['_openTime'])
+        self.startTime = float(value['_startTime'])
+        self.stopTime = float(value['_stopTime'])
+        self.avg_floor = (self.minFloor + self.maxFloor) / 2
+        self.queue = []
+        self.time = float(0)
 
-        self.STOP_TIME = self.stopTime + self.startTime + self.closeTime + self.openTime
-        self.floor = []
-        self.dir = 0
-        self.pos = int(0)
-        self.startingTime = 0
-        self.timeToEnd = 0
-        self.timeNow = 0
-        self.pqUp = []
-        self.pqDown = []
-        self.flag = False
+    def time_to_arrive(self, c: Calls):
+        time = 0
+        time += (self.openTime + self.closeTime) * 2
+        # if the call dest isnt the current floor add the travel time
+        if self.avg_floor != c.src:
+            time += self.startTime + self.stopTime + abs(self.avg_floor - c.src) / self.speed
+        # add the travel time to dest
+        time += self.startTime + self.stopTime + abs(c.src - c.dest) / self.speed
+        if not self.time < c.time:  # if the call doesn't happens after the current elevator queue will finish
+            time += c.time  # add to time the difference
+        return time
 
-    # Calculate the distance include stops
-    def calcAllQueue(self) -> float:
-        dif = abs(self.pos - self.floor[-1])
-        return dif + len(self.floor) * self.STOP_TIME / self.speed
